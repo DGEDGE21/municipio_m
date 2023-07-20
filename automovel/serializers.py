@@ -16,6 +16,18 @@ class AutomovelSerializer(serializers.ModelSerializer):
         automovel = Automovel.objects.create(id_municipe=municipe, **validated_data)
         return automovel
 
+class AutomovelCreateSerializer(serializers.ModelSerializer):
+    nr_contribuente = serializers.CharField(write_only=True)
+    class Meta:
+        model = Automovel
+        fields = ['id', 'nr_contribuente','matricula', 'marca', 'modelo', 'combustivel', 'cilindrada', 'lotacao', 'ano_fabrico', 'ano_compra', 'tipo', 'natureza', 'capacidade_carga']
+
+    def create(self, validated_data):
+        nr_contribuente = validated_data.pop('nr_contribuente')
+        municipe = Municipe.objects.get(nr_contribuente=nr_contribuente)
+        automovel = Automovel.objects.create(id_municipe=municipe, **validated_data)
+        return automovel
+
 class Automovel_Grupo_Escalao_Serializado(serializers.ModelSerializer):
     class Meta:
         model=Automovel_Grupo_Escalao

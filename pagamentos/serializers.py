@@ -4,6 +4,8 @@ from Municipe.serializers import *
 from impostos.serializers import *
 from Propriedade.serializers import *
 from automovel.serializers import *
+from taxas.serializers import *
+from estabelecimento.serializers import *
 
 class PagamentoSerializer(serializers.ModelSerializer):
     bairro=BairroSerializer()
@@ -37,3 +39,20 @@ class IavPagamentoSerializer(serializers.ModelSerializer):
     class Meta:
         model = IavPagamento
         fields = ['id', 'municipe', 'automovel','imposto', 'pagamento', 'epoca']
+
+class TaePagamentoSerializer(serializers.ModelSerializer):
+    municipe = MunicipeSerializer()
+    taxa = TaxaSerializer()
+    pagamento = PagamentoSerializer()
+    estabelecimento=EstabelecimentoSerializer()
+    class Meta:
+        model = TaePagamento
+        fields = ['id', 'municipe', 'estabelecimento','taxa', 'pagamento', 'epoca']
+
+class DeclaracaoPagamentoSerializer(serializers.ModelSerializer):
+    municipe = MunicipeSerializer()
+    taxa = TaxaSerializer()
+    pagamento = PagamentoSerializer()
+    class Meta:
+        model = TaePagamento
+        fields = ['id', 'municipe', 'taxa', 'pagamento']

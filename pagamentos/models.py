@@ -3,7 +3,10 @@ from django.contrib.auth.models import User
 from Municipe.models import Municipe, Bairro
 from Propriedade.models import Propriedade
 from impostos.models import Imposto
+from taxas.models import Taxa
 from automovel.models import Automovel
+from estabelecimento.models import Estabelecimento
+
 class Pagamento(models.Model):
     id = models.AutoField(primary_key=True, db_column='id_pagamento')
     valor = models.DecimalField(max_digits=10, decimal_places=2, db_column='valor')
@@ -57,3 +60,29 @@ class IavPagamento(models.Model):
 
     class Meta:
         db_table = 'iav_pagamento'
+
+class TaePagamento(models.Model):
+    id = models.AutoField(primary_key=True, db_column='id_tae_pagamento')
+    municipe = models.ForeignKey(Municipe, on_delete=models.CASCADE, db_column='id_municipe')
+    estabelecimento = models.ForeignKey(Estabelecimento, on_delete=models.CASCADE, db_column='id_estabelecimento')
+    taxa = models.ForeignKey(Taxa, on_delete=models.CASCADE, db_column='id_taxa')
+    pagamento = models.ForeignKey(Pagamento, on_delete=models.CASCADE, db_column='id_pagamento')
+    epoca = models.CharField(max_length=100, db_column='epoca')
+
+    def __str__(self):
+        return f"TaePagamento {self.id}"
+
+    class Meta:
+        db_table = 'tae_pagamento'
+
+class DeclaracaoPagamento(models.Model):
+    id = models.AutoField(primary_key=True, db_column='id_declaracao_pagamento')
+    municipe = models.ForeignKey(Municipe, on_delete=models.CASCADE, db_column='id_municipe')
+    taxa = models.ForeignKey(Taxa, on_delete=models.CASCADE, db_column='id_taxa')
+    pagamento = models.ForeignKey(Pagamento, on_delete=models.CASCADE, db_column='id_pagamento')
+
+    def __str__(self):
+        return f"DeclaracaoPagamento {self.id}"
+
+    class Meta:
+        db_table = 'declaracao_pagamento'

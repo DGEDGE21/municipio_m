@@ -24,5 +24,8 @@ urlpatterns = [
     path("automovel/",include('automovel.urls')),
     path("propriedade/",include('Propriedade.urls')),
     path("impostos/",include('impostos.urls')),
+    path("taxas/",include('taxas.urls')),
     path("bills/",include('pagamentos.urls')),
+    path("estabelecimento/",include('estabelecimento.urls')),
+    path("declaracao/",include('declaracao.urls')),
 ]

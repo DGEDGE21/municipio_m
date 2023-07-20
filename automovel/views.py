@@ -19,7 +19,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 
 class AutomovelCreateView(CreateAPIView):
-    serializer_class = AutomovelSerializer
+    serializer_class = AutomovelCreateSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 

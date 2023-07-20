@@ -47,7 +47,9 @@ INSTALLED_APPS = [
     "Propriedade",
     "pagamentos",
     "impostos",
-    "taxas"
+    "taxas",
+    "estabelecimento",
+    "declaracao"
 ]
 
 MIDDLEWARE = [
