@@ -22,6 +22,7 @@ from Propriedade.serializers import*
 from impostos.models import Imposto
 from estabelecimento.models import *
 from declaracao.models import *
+from urbanizacao.models import *
 from taxas.models import *
 from rest_framework import status
 from django.db import transaction
@@ -51,7 +52,8 @@ class payIpa(CreateAPIView):
                 bill = Pagamento.objects.create(
                     bairro=bairro,
                     valor=self.request.data['valor'],
-                    user=usuario
+                    user=usuario,
+                    metodo=self.request.data['metodo']
                 )
 
                 # Criando o objeto IpaPagamento
@@ -161,7 +163,8 @@ class payProp(CreateAPIView):
                 bill = Pagamento.objects.create(
                     bairro=bairro,
                     valor=self.request.data['valor'],
-                    user=usuario
+                    user=usuario,
+                    metodo=self.request.data['metodo']
                 )
 
                 # Criando o objeto IpaPagamento
@@ -236,7 +239,8 @@ class payIav(CreateAPIView):
                 bill = Pagamento.objects.create(
                     bairro=bairro,
                     valor=self.request.data['valor'],
-                    user=usuario
+                    user=usuario,
+                    metodo=self.request.data['metodo']
                 )
 
                 # Criando o objeto IavPagamento
@@ -323,7 +327,8 @@ class payTae(CreateAPIView):
                 bill = Pagamento.objects.create(
                     bairro=bairro,
                     valor=self.request.data['valor'],
-                    user=usuario
+                    user=usuario,
+                    metodo=self.request.data['metodo']
                 )
 
                 # Criando o objeto IpaPagamento
@@ -378,7 +383,8 @@ class payDeclaracao(CreateAPIView):
                 bill = Pagamento.objects.create(
                     bairro=bairro,
                     valor=self.request.data['valor'],
-                    user=usuario
+                    user=usuario,
+                    metodo=self.request.data['metodo']
                 )
 
                 # Criando o objeto IpaPagamento
@@ -411,7 +417,7 @@ class DeclaracaoCheckView(APIView):
     def post(self, request, format=None):
         idDcl = request.data.get('id')
         try:
-            dcl_pay = DeclaracaoPagamento.objects.get(id=idDcl)
+            dcl_pay = DeclaracaoPagamento.objects.get(pagamento__id=idDcl)
             dcl_s=DeclaracaoPagamentoSerializer(dcl_pay).data
             # Verificar o tipo da declaração associada e obter o objeto concreto
             if hasattr(dcl_pay, 'declaracaocoabitacao'):
@@ -436,3 +442,276 @@ class DeclaracaoCheckView(APIView):
 
         except DeclaracaoPagamento.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class payUrb(CreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        print(self.request.data)
+        try:
+            user = request.user
+            usuario = User.objects.get(username=user)
+
+            pessoa = Municipe.objects.get(
+                nr_contribuente=self.request.data['nr_contribuente']
+            )
+
+            bairro = Bairro.objects.get(id=self.request.data['id_bairro'])
+
+            tipo = Taxa.objects.get(rubrica=self.request.data['rubrica'])
+
+            prop=Propriedade.objects.get(id=self.request.data['id_propriedade'])
+
+            with transaction.atomic():  # Inicia uma transação
+
+                # Criando o objeto Pagamento
+                bill = Pagamento.objects.create(
+                    bairro=bairro,
+                    valor=self.request.data['valor'],
+                    user=usuario,
+                    metodo=self.request.data['metodo']
+                )
+
+                # Criando o objeto IpaPagamento
+                billProp = UrbPagamento.objects.create(
+                    municipe=pessoa,
+                    taxa=tipo,
+                    pagamento=bill,
+                    propriedade=prop
+                )
+
+            serializer = UrbPagamentoSerializer(billProp)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Em caso de erro, remove os objetos criados
+            if 'bill' in locals() and bill:
+                bill.delete()
+            if 'billProp' in locals() and billProp:
+                billProp.delete()
+
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+
+class UrbListView(ListAPIView):
+    queryset = UrbPagamento.objects.all()
+    serializer_class = UrbPagamentoSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+class payPub(CreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        print(self.request.data)
+        try:
+            user = request.user
+            usuario = User.objects.get(username=user)
+
+            pessoa = Municipe.objects.get(
+                nr_contribuente=self.request.data['nr_contribuente']
+            )
+
+            bairro = Bairro.objects.get(id=self.request.data['id_bairro'])
+
+            tipo = Taxa.objects.get(rubrica=self.request.data['rubrica'])
+
+            with transaction.atomic():  # Inicia uma transação
+
+                # Criando o objeto Pagamento
+                bill = Pagamento.objects.create(
+                    bairro=bairro,
+                    valor=self.request.data['valor'],
+                    user=usuario,
+                    metodo=self.request.data['metodo']
+                )
+
+                # Criando o objeto IpaPagamento
+                billProp = PubPagamento.objects.create(
+                    municipe=pessoa,
+                    taxa=tipo,
+                    pagamento=bill,
+                    tipo=self.request.data['tipo'],
+                    unidade=self.request.data['unit']
+                )
+
+            serializer = PubPagamentoSerializer(billProp)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Em caso de erro, remove os objetos criados
+            if 'bill' in locals() and bill:
+                bill.delete()
+            if 'billProp' in locals() and billProp:
+                billProp.delete()
+
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+
+class PubListView(ListAPIView):
+    queryset = PubPagamento.objects.all()
+    serializer_class = PubPagamentoSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+class payTrans(CreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        print(self.request.data)
+        try:
+            user = request.user
+            usuario = User.objects.get(username=user)
+
+            pessoa = Municipe.objects.get(
+                nr_contribuente=self.request.data['nr_contribuente']
+            )
+
+            bairro = Bairro.objects.get(id=self.request.data['id_bairro'])
+
+            tipo = Taxa.objects.get(rubrica=self.request.data['rubrica'])
+
+            with transaction.atomic():  # Inicia uma transação
+
+                # Criando o objeto Pagamento
+                bill = Pagamento.objects.create(
+                    bairro=bairro,
+                    valor=self.request.data['valor'],
+                    user=usuario,
+                    metodo=self.request.data['metodo']
+                )
+
+                # Criando o objeto IpaPagamento
+                billProp = TransPagamento.objects.create(
+                    municipe=pessoa,
+                    taxa=tipo,
+                    pagamento=bill,
+                )
+
+            serializer = TransPagamentoSerializer(billProp)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Em caso de erro, remove os objetos criados
+            if 'bill' in locals() and bill:
+                bill.delete()
+            if 'billProp' in locals() and billProp:
+                billProp.delete()
+
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+
+class TransListView(ListAPIView):
+    queryset = TransPagamento.objects.all()
+    serializer_class = TransPagamentoSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+class ListImpostos(APIView):
+    def get(self, request, format=None):
+        ipa_pagamentos=IpaPagamento.objects.all()	
+        prop_pagamentos=PropPagamento.objects.all()
+        iav_pagamentos=IavPagamento.objects.all()
+
+        #serializers
+        ipa_serializer=IpaPagamentoSerializer(ipa_pagamentos, many=True)
+        prop_serializer=PropPagamentoSerializer(prop_pagamentos, many=True)
+        iav_serializer=IavPagamentoSerializer(iav_pagamentos, many=True)
+
+        #junta em uma lista e ordena por pagamento.data
+        lista=ipa_serializer.data+prop_serializer.data+iav_serializer.data
+        lista.sort(key=lambda x: x['pagamento']['data'])
+
+        #retorne o response
+        return Response(lista, status=status.HTTP_200_OK)
+
+class ListTaxas(APIView):
+    def get(self, request, format=None):
+        tae_pagamentos=TaePagamento.objects.all()
+        urb_pagamentos=UrbPagamento.objects.all()
+        decl_pagamentos=DeclaracaoPagamento.objects.all()
+        pub_pagamentos=PubPagamento.objects.all()
+        trans_pagamentos=TransPagamento.objects.all()
+        residual_pagamentos=ResidualPagamento.objects.all()
+        #serializers
+        tae_serializer=TaePagamentoSerializer(tae_pagamentos, many=True)
+        urb_serializer=UrbPagamentoSerializer(urb_pagamentos, many=True)
+        decl_serializer=DeclaracaoPagamentoSerializer(decl_pagamentos, many=True)
+        pub_serializer=PubPagamentoSerializer(pub_pagamentos, many=True)
+        trans_serializers=TransPagamentoSerializer(trans_pagamentos, many=True)
+        residual_serializers=ResidualPagamentoSerializer(residual_pagamentos, many=True)
+        #junta em uma lista e ordena por pagamento.data
+        lista=tae_serializer.data+urb_serializer.data+decl_serializer.data+pub_serializer.data+trans_serializers.data+residual_serializers.data
+        lista.sort(key=lambda x: x['pagamento']['data'])
+
+        #retorne o response
+        return Response(lista, status=status.HTTP_200_OK)
+
+class UrbanizacaoCheckView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self, request, format=None):
+        idUrb = request.data.get('id')
+        try:
+            urb_pay = UrbPagamento.objects.get(pagamento__id=idUrb)
+            urb_s= UrbPagamentoSerializer(urb_pay).data
+            # Verificar o tipo da declaração associada e obter o objeto concreto
+            if hasattr(urb_pay, 'licensaduat'):
+                licensa_associada = urb_pay.licensaduat
+            else:
+                # Caso a declaração associada não corresponda a nenhum tipo conhecido
+                return Response({'exists': False, 'dados': urb_s}, status=status.HTTP_200_OK)
+            # Obter os dados serializados da declaração associada
+            return Response({'exists': True}, status=status.HTTP_200_OK)
+
+        except UrbPagamento.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class payResidual(CreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        print(self.request.data)
+        try:
+            user = request.user
+            usuario = User.objects.get(username=user)
+
+            pessoa = Municipe.objects.get(
+                nr_contribuente=self.request.data['nr_contribuente']
+            )
+
+            bairro = Bairro.objects.get(id=self.request.data['id_bairro'])
+
+            tipo = Taxa.objects.get(rubrica=self.request.data['rubrica'])
+
+            with transaction.atomic():  # Inicia uma transação
+
+                # Criando o objeto Pagamento
+                bill = Pagamento.objects.create(
+                    bairro=bairro,
+                    valor=self.request.data['valor'],
+                    user=usuario,
+                    metodo=self.request.data['metodo']
+                )
+
+                # Criando o objeto IpaPagamento
+                billProp = ResidualPagamento.objects.create(
+                    municipe=pessoa,
+                    taxa=tipo,
+                    pagamento=bill,
+                )
+
+            serializer = ResidualPagamentoSerializer(billProp)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Em caso de erro, remove os objetos criados
+            if 'bill' in locals() and bill:
+                bill.delete()
+            if 'billProp' in locals() and billProp:
+                billProp.delete()
+
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+
+class ResidualListView(ListAPIView):
+    queryset = ResidualPagamento.objects.all()
+    serializer_class = ResidualPagamentoSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]

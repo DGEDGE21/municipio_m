@@ -11,7 +11,7 @@ from .models import (
 )
 from pagamentos.serializers import *
 
-class DeclaracaoBaseSerializer(serializers.ModelSerializer):
+class DeclaracaoSerializer(serializers.ModelSerializer):
     pagamento=DeclaracaoPagamentoSerializer()
     class Meta:
         model = DeclaracaoBase
@@ -19,42 +19,49 @@ class DeclaracaoBaseSerializer(serializers.ModelSerializer):
 
 
 class DeclaracaoCoabitacaoSerializer(serializers.ModelSerializer):
+    pagamento=DeclaracaoPagamentoSerializer()
     class Meta:
         model = DeclaracaoCoabitacao
         fields = '__all__'
 
 
 class DeclaracaoPobrezaSerializer(serializers.ModelSerializer):
+    pagamento=DeclaracaoPagamentoSerializer()
     class Meta:
         model = DeclaracaoPobreza
         fields = '__all__'
 
 
 class DeclaracaoResidenciaSerializer(serializers.ModelSerializer):
+    pagamento=DeclaracaoPagamentoSerializer()
     class Meta:
         model = DeclaracaoResidencia
         fields = '__all__'
 
 
 class DeclaracaoMatricialSerializer(serializers.ModelSerializer):
+    pagamento=DeclaracaoPagamentoSerializer()
     class Meta:
         model = DeclaracaoMatricial
         fields = '__all__'
 
 
 class DeclaracaoViagemSerializer(serializers.ModelSerializer):
+    pagamento=DeclaracaoPagamentoSerializer()
     class Meta:
         model = DeclaracaoViagem
         fields = '__all__'
 
 
 class DeclaracaoCredencialViagemSerializer(serializers.ModelSerializer):
+    pagamento=DeclaracaoPagamentoSerializer()
     class Meta:
         model = DeclaracaoCredencialViagem
         fields = '__all__'
 
 
 class DeclaracaoObitoSerializer(serializers.ModelSerializer):
+    pagamento=DeclaracaoPagamentoSerializer()
     class Meta:
         model = DeclaracaoObito
         fields = '__all__'

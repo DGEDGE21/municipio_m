@@ -9,13 +9,14 @@ class Bairro(models.Model):
         db_table = 'bairro'
 
     def __str__(self):
-        return self.nome
+        return f'{self.id}-{self.nome}'
 
 class Municipe(models.Model):
     id = models.AutoField(primary_key=True, db_column='id_municipe')
     nome = models.CharField(max_length=100, db_column='nome_municipe', verbose_name='Nome')
     data_nascimento = models.DateField(db_column='data_nascimento', verbose_name='Data de Nascimento')
     genero = models.CharField(max_length=20, db_column='genero')
+    nacionalidade = models.CharField(max_length=50, db_column='nacionalidade', default='Moçambicano(a)')
     nuit = models.CharField(max_length=20, db_column='nuit')
     bilhete_identidade = models.CharField(max_length=20, db_column='bilhete_identidade', verbose_name='Bilhete de Identidade')
     bairro = models.ForeignKey(Bairro, on_delete=models.CASCADE, db_column='bairro_id', verbose_name='Bairro')

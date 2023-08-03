@@ -28,4 +28,7 @@ urlpatterns = [
     path("bills/",include('pagamentos.urls')),
     path("estabelecimento/",include('estabelecimento.urls')),
     path("declaracao/",include('declaracao.urls')),
+    path("urbanizacao/",include('urbanizacao.urls')),
+    path("administracao/",include('administracao.urls')),
+    path("audiencia/",include('audiencia.urls')),
 ]

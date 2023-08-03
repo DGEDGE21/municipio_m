@@ -18,5 +18,16 @@ urlpatterns = [
     path('pay-decl/', payDeclaracao.as_view(), name='pay-decl'),
     path('list-decl/', DeclaracaoListView.as_view(), name='list-decl'),
     path('check-decl/', DeclaracaoCheckView.as_view(), name='list-decl'),
+    path('pay-urb/', payUrb.as_view(), name='pay-urb'),
+    path('list-urb/', UrbListView.as_view(), name='list-urb'),
+    path('pay-pub/', payPub.as_view(), name='pay-urb'),
+    path('list-pub/', PubListView.as_view(), name='list-urb'),
+    path('pay-trans/', payTrans.as_view(), name='pay-trans'),
+    path('list-trans/', TransListView.as_view(), name='list-trans'),
+    path('list-impostos/', ListImpostos.as_view(), name='list-impostos'),
+    path('list-taxas/', ListTaxas.as_view(), name='list-taxas'),
+    path('check-urb/', UrbanizacaoCheckView.as_view(), name='check-urb'),
+    path('pay-residual/', payResidual.as_view(), name='pay-residual'),
+    path('list-residual/', ResidualListView.as_view(), name='list-residual')
     # Outras URLs do seu aplicativo...
 ]

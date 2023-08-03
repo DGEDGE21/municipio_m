@@ -6,12 +6,14 @@ from Propriedade.serializers import *
 from automovel.serializers import *
 from taxas.serializers import *
 from estabelecimento.serializers import *
+from rest_framework import serializers
 
 class PagamentoSerializer(serializers.ModelSerializer):
     bairro=BairroSerializer()
+    user = serializers.ReadOnlyField(source='user.username')
     class Meta:
         model = Pagamento
-        fields = ['id', 'valor', 'bairro','data']
+        fields = ['id', 'valor', 'bairro','data','metodo','user']
 
 class IpaPagamentoSerializer(serializers.ModelSerializer):
     municipe = MunicipeSerializer()
@@ -56,3 +58,37 @@ class DeclaracaoPagamentoSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaePagamento
         fields = ['id', 'municipe', 'taxa', 'pagamento']
+
+class UrbPagamentoSerializer(serializers.ModelSerializer):
+    municipe = MunicipeSerializer()
+    taxa = TaxaSerializer()
+    pagamento = PagamentoSerializer()
+    propriedade=PropriedadeSerializer
+    class Meta:
+        model = PropPagamento
+        fields = ['id', 'municipe', 'propriedade','taxa', 'pagamento']
+
+class PubPagamentoSerializer(serializers.ModelSerializer):
+    municipe = MunicipeSerializer()
+    taxa = TaxaSerializer()
+    pagamento = PagamentoSerializer()
+    class Meta:
+        model = PubPagamento
+        fields = ['id', 'municipe', 'taxa', 'unidade','tipo','pagamento']
+
+class TransPagamentoSerializer(serializers.ModelSerializer):
+    municipe = MunicipeSerializer()
+    taxa = TaxaSerializer()
+    pagamento = PagamentoSerializer()
+    class Meta:
+        model = TransPagamento
+        fields = ['id', 'municipe', 'taxa','pagamento']
+
+class ResidualPagamentoSerializer(serializers.ModelSerializer):
+    municipe = MunicipeSerializer()
+    taxa = TaxaSerializer()
+    pagamento = PagamentoSerializer()
+    class Meta:
+        model = ResidualPagamento
+        fields = ['id', 'municipe', 'taxa','pagamento']
+

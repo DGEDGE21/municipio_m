@@ -37,6 +37,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ObjectDoesNotExist
+from administracao.models import *
+from administracao.serializers import *
 
 class LoginAPI(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
@@ -53,7 +55,16 @@ class LoginAPI(KnoxLoginView):
                 identifica = user.username
             _, token = AuthToken.objects.create(user=user)
 
-            return Response(data={'token': token,  'grupo': grupo,  'username': identifica, 'status': 200}, status=200)
+            prof=Funcionario.objects.get(user=user)
+            prof_s = FuncionarioSerializer(prof).data
+            #pega o username e faz slice para pegar o conteudo antes do @
+            username = user.username.split('@')[0]
+            nome=prof.municipe.nome
+            #pega o nome do funcionario
+            unidade = prof.unidade.nome
+            unidade_id=prof.unidade.id
+
+            return Response(data={'token': token,  'grupo': grupo,  'unidade':unidade,'id_unidade':unidade_id,'username': username, 'nome':nome,'status': 200}, status=200)
         except AuthenticationFailed as e:
             return Response(data={'message': str(e)}, status=401)
         except Exception as e:

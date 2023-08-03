@@ -62,6 +62,7 @@ class MunicipeListAPIView(CreateAPIView):
             # Adiciona o resultado para o munícipe atual
             mun_s=MunicipeSerializer(municipe).data
             mun_s['situacao']=situacao
+            mun_s['valor']=Imposto.objects.get(rubrica='112101').valor
             print(mun_s)
             result.append(
                 mun_s
@@ -96,7 +97,12 @@ class PropriedadeListAPIView(CreateAPIView):
         
             # Adiciona o resultado para o munícipe atual
             prop_s=PropriedadeSerializer(prop).data
+            if(prop_s['tipo']=='Habitacao'):
+                valor= float(prop_s['valor_patrimonial'])*0.004
+            else:
+                valor= float(prop_s['valor_patrimonial'])*0.007
             prop_s['situacao']=situacao
+            prop_s['valor_ipra']=valor
             print(prop_s)
             result.append(
                 prop_s

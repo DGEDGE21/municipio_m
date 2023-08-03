@@ -12,7 +12,7 @@ class MunicipeCreateSerializer(serializers.ModelSerializer):
     bairro_id = serializers.PrimaryKeyRelatedField(queryset=Bairro.objects.all(), source='bairro', write_only=True)
     class Meta:
         model = Municipe
-        fields = ['id','nome', 'data_nascimento', 'genero', 'nuit', 'bilhete_identidade', 'bairro_id', 'telefone', 'email', 'tipo_municipe', 'nr_contribuente', 'data_registro']
+        fields = ['id','nome', 'data_nascimento', 'nacionalidade','genero', 'nuit', 'bilhete_identidade', 'bairro_id', 'telefone', 'email', 'tipo_municipe', 'nr_contribuente', 'data_registro']
     
     def create(self, validated_data):
         bairro_id = validated_data.pop('bairro').id
@@ -44,7 +44,7 @@ class MunicipeSerializer(serializers.ModelSerializer):
     bairro=BairroSerializer()
     class Meta:
         model = Municipe
-        fields = ['id','nome', 'data_nascimento', 'genero', 'nuit', 'bilhete_identidade', 'bairro_id', 'bairro', 'telefone', 'email', 'tipo_municipe', 'nr_contribuente', 'data_registro']
+        fields = ['id','nome', 'data_nascimento', 'genero', 'nacionalidade', 'nuit', 'bilhete_identidade', 'bairro_id', 'bairro', 'telefone', 'email', 'tipo_municipe', 'nr_contribuente', 'data_registro']
     
 
 class MunicipeUpdateSerializer(serializers.ModelSerializer):
@@ -52,7 +52,7 @@ class MunicipeUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Municipe
-        fields = ['id', 'nome', 'data_nascimento', 'genero', 'nuit', 'bilhete_identidade', 'bairro_id', 'telefone', 'email', 'tipo_municipe', 'nr_contribuente', 'data_registro']
+        fields = ['id', 'nome', 'data_nascimento', 'nacionalidade', 'genero', 'nuit', 'bilhete_identidade', 'bairro_id', 'telefone', 'email', 'tipo_municipe', 'nr_contribuente', 'data_registro']
 
     def update(self, instance, validated_data):
         bairro_id = validated_data.pop('bairro_id', None)
