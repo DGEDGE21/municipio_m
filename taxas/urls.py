@@ -7,5 +7,6 @@ urlpatterns = [
     path('list-tae/', EstabelecimentoListAPIView.as_view(), name='tae-list'),
     path('calculoUrbanizacao/', calculo_urbanizacao.as_view(), name='tae-list'),
     path('calculoPublicidade/', calculo_publicidade.as_view(), name='tae-list'),
+    path('cadastrar/', cadastrar_taxas.as_view(), name='tae-list'),
     # Outras URLs da sua aplicação...
 ]

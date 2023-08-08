@@ -46,18 +46,18 @@ class FuncionarioCreateAPIView(CreateAPIView):
         print(self.request.data)
         unidade=Unidade.objects.get(nome=self.request.data['unidade'])
         municipe=Municipe.objects.get(nr_contribuente=self.request.data['nr_contribuente'])
-
+        print(1)
         lastName=municipe.nome.split()[-1]
         firstName=municipe.nome.split()[0]
         username = firstName.lower()+'.'+lastName.lower()+str(municipe.id)+'@sgm.gov.mz'
-
+        print(2)
         #criar o user
         default_password='sgm@2023'
         serializer = self.get_serializer(data={"username": f"{username}", "password": make_password(default_password),
             "first_name": f"{firstName}", "last_name": f"{lastName}"})
         serializer.is_valid(raise_exception=True)
         usuario = serializer.save()
-
+        print(3)
         try:
             #pegar o grupo
             gg = Group.objects.get(name=self.request.data['acesso'])

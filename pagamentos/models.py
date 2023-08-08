@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from Municipe.models import Municipe, Bairro
+from Municipe.models import Municipe, Bairro, Mercado
 from Propriedade.models import Propriedade
 from impostos.models import Imposto
 from taxas.models import Taxa
@@ -137,4 +137,29 @@ class ResidualPagamento(models.Model):
 
     class Meta:
         db_table = 'residual_pagamento'
+
+class MercadoPagamento(models.Model):
+    id = models.AutoField(primary_key=True, db_column='id_mercado_pagamento')
+    municipe = models.ForeignKey(Municipe, on_delete=models.CASCADE, db_column='id_municipe')
+    mercado=models.ForeignKey(Mercado, on_delete=models.CASCADE, db_column='id_mercado')
+    taxa = models.ForeignKey(Taxa, on_delete=models.CASCADE, db_column='id_taxa')
+    pagamento = models.ForeignKey(Pagamento, on_delete=models.CASCADE, db_column='id_pagamento')
+
+    def __str__(self):
+        return f"MercadoPagamento {self.id}"
+
+    class Meta:
+        db_table = 'mercado_pagamento'
+
+class GenericoPagamento(models.Model):
+    id = models.AutoField(primary_key=True, db_column='id_generico_pagamento')
+    municipe = models.ForeignKey(Municipe, on_delete=models.CASCADE, db_column='id_municipe')
+    taxa = models.ForeignKey(Taxa, on_delete=models.CASCADE, db_column='id_taxa')
+    pagamento = models.ForeignKey(Pagamento, on_delete=models.CASCADE, db_column='id_pagamento')
+
+    def __str__(self):
+        return f"GenericoPagamento {self.id}"
+
+    class Meta:
+        db_table = 'generico_pagamento'
 

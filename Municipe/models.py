@@ -11,6 +11,16 @@ class Bairro(models.Model):
     def __str__(self):
         return f'{self.id}-{self.nome}'
 
+class Mercado(models.Model):
+    id = models.AutoField(primary_key=True, db_column='id_mercado')
+    nome = models.CharField(max_length=100, db_column='nome_mercado', verbose_name='Nome do Mercado')
+
+    class Meta:
+        db_table = 'mercado'
+
+    def __str__(self):
+        return f'{self.id}-Mercado {self.nome}'
+
 class Municipe(models.Model):
     id = models.AutoField(primary_key=True, db_column='id_municipe')
     nome = models.CharField(max_length=100, db_column='nome_municipe', verbose_name='Nome')

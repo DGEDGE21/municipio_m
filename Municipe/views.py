@@ -36,6 +36,12 @@ class BairroListView(ListAPIView):
     serializer_class = BairroSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+class MercadoListView(ListAPIView):
+    queryset = Mercado.objects.all()
+    serializer_class = MercadoSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     
 class MunicipeListView(ListAPIView):
     queryset = Municipe.objects.all()
@@ -84,9 +90,11 @@ class MunicipePagamentosView(APIView):
                 data_pagamento = ipa_pagamento.pagamento.data.strftime('%Y-%m-%d') if ipa_pagamento else None
 
                 lista.append({
+                    "nr_contribuente":nr_contribuinte,
                     "epoca": ano,
                     "valor": valor,
                     "situacao": situacao,
+                    "rubrica": 112101,
                     "tipo": "Imposto Pessoal Autarquico",
                     "dataPagamento": data_pagamento
                 })
@@ -101,9 +109,11 @@ class MunicipePagamentosView(APIView):
                 data_pagamento = iav_pagamento.pagamento.data.strftime('%Y-%m-%d')[:10] if iav_pagamento else None
 
                 lista.append({
+                    "nr_contribuente":nr_contribuinte,
                     "epoca": ano,
                     "valor": valor,
                     "situacao": situacao,
+                    "rubrica":112202,
                     "tipo": "Imposto Autarquico de Veiculos",
                     "matricula": automovel.matricula,
                     "dataPagamento": data_pagamento
@@ -120,9 +130,11 @@ class MunicipePagamentosView(APIView):
                 #arrendoda o valor para 2 casas decimais
                 valor = round(valor, 2)
                 lista.append({
+                    "nr_contribuente":nr_contribuinte,
                     "epoca": ano,
                     "valor": (valor),
                     "situacao": situacao,
+                    "rubrica":112203,
                     "tipo": "Imposto Predial Autarquico",
                     "propriedade": propriedade.id,
                     "dataPagamento": data_pagamento
@@ -138,12 +150,25 @@ class MunicipePagamentosView(APIView):
                 data_pagamento = tae_pagamento.pagamento.data.strftime('%Y-%m-%d')[:10] if tae_pagamento and situacao == "Pago" else None
 
                 lista.append({
+                    "nr_contribuente":nr_contribuinte,
                     "epoca": ano,
                     "valor": estabelecimento.valor_tae,
                     "situacao": situacao,
+                    "rubrica":114108,
                     "tipo": "Taxa de Actividade Económica",
                     "estabelecimento": estabelecimento.id,
                     "dataPagamento": data_pagamento
                 })
 
         return Response(lista, status=200)
+
+class cadastrar_mercados(APIView):
+    def post(self, request, format=None):
+        mercados = request.data.get('mercados')
+        for mercado in mercados:
+            nome=mercado.get('mercado')
+            mercado_obj = Mercado.objects.create(
+                nome=nome,
+            )
+            mercado_obj.save()
+        return Response(data={"success": True})

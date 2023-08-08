@@ -630,6 +630,8 @@ class ListTaxas(APIView):
         pub_pagamentos=PubPagamento.objects.all()
         trans_pagamentos=TransPagamento.objects.all()
         residual_pagamentos=ResidualPagamento.objects.all()
+        mercado_pagamentos=MercadoPagamento.objects.all()
+        generico_pagamentos=GenericoPagamento.objects.all()
         #serializers
         tae_serializer=TaePagamentoSerializer(tae_pagamentos, many=True)
         urb_serializer=UrbPagamentoSerializer(urb_pagamentos, many=True)
@@ -637,8 +639,10 @@ class ListTaxas(APIView):
         pub_serializer=PubPagamentoSerializer(pub_pagamentos, many=True)
         trans_serializers=TransPagamentoSerializer(trans_pagamentos, many=True)
         residual_serializers=ResidualPagamentoSerializer(residual_pagamentos, many=True)
+        mercado_serializers=MercadoPagamentoSerializer(mercado_pagamentos, many=True)
+        generico_serializer=GenericoPagamentoSerializer(generico_pagamentos, many=True)
         #junta em uma lista e ordena por pagamento.data
-        lista=tae_serializer.data+urb_serializer.data+decl_serializer.data+pub_serializer.data+trans_serializers.data+residual_serializers.data
+        lista=tae_serializer.data+generico_serializer.data+urb_serializer.data+decl_serializer.data+pub_serializer.data+trans_serializers.data+residual_serializers.data+mercado_serializers.data
         lista.sort(key=lambda x: x['pagamento']['data'])
 
         #retorne o response
@@ -715,3 +719,145 @@ class ResidualListView(ListAPIView):
     serializer_class = ResidualPagamentoSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+class payMercado(CreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        print(self.request.data)
+        try:
+            user = request.user
+            usuario = User.objects.get(username=user)
+
+            pessoa = Municipe.objects.get(
+                nr_contribuente=self.request.data['nr_contribuente']
+            )
+
+            bairro = Bairro.objects.get(id=self.request.data['id_bairro'])
+
+            mercado=Mercado.objects.get(id=self.request.data['id_mercado'])
+
+            tipo = Taxa.objects.get(rubrica=self.request.data['rubrica'])
+
+            with transaction.atomic():  # Inicia uma transação
+
+                # Criando o objeto Pagamento
+                bill = Pagamento.objects.create(
+                    bairro=bairro,
+                    valor=self.request.data['valor'],
+                    user=usuario,
+                    metodo=self.request.data['metodo']
+                )
+
+                # Criando o objeto IpaPagamento
+                billProp = MercadoPagamento.objects.create(
+                    municipe=pessoa,
+                    taxa=tipo,
+                    mercado=mercado,
+                    pagamento=bill,
+                )
+
+            serializer = MercadoPagamentoSerializer(billProp)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Em caso de erro, remove os objetos criados
+            if 'bill' in locals() and bill:
+                bill.delete()
+            if 'billProp' in locals() and billProp:
+                billProp.delete()
+
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+
+class MercadoListView(ListAPIView):
+    queryset = MercadoPagamento.objects.all()
+    serializer_class = MercadoPagamentoSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+class payGenerico(CreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        print(self.request.data)
+        try:
+            user = request.user
+            usuario = User.objects.get(username=user)
+
+            pessoa = Municipe.objects.get(
+                nr_contribuente=self.request.data['nr_contribuente']
+            )
+
+            bairro = Bairro.objects.get(id=self.request.data['id_bairro'])
+
+            tipo = Taxa.objects.get(rubrica=self.request.data['rubrica'])
+
+            with transaction.atomic():  # Inicia uma transação
+
+                # Criando o objeto Pagamento
+                bill = Pagamento.objects.create(
+                    bairro=bairro,
+                    valor=self.request.data['valor'],
+                    user=usuario,
+                    metodo=self.request.data['metodo']
+                )
+
+                # Criando o objeto IpaPagamento
+                billProp = GenericoPagamento.objects.create(
+                    municipe=pessoa,
+                    taxa=tipo,
+                    pagamento=bill,
+                )
+
+            serializer = GenericoPagamentoSerializer(billProp)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Em caso de erro, remove os objetos criados
+            if 'bill' in locals() and bill:
+                bill.delete()
+            if 'billProp' in locals() and billProp:
+                billProp.delete()
+
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+
+class GenericoListView(ListAPIView):
+    queryset = GenericoPagamento.objects.all()
+    serializer_class = GenericoPagamentoSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+class MunicipePagamentos(APIView):
+    def get(self, request, format=None, **kwargs):
+        municipe=Municipe.objects.get(nr_contribuente=self.kwargs['nr_contribuinte'])
+
+        ipa_pagamentos=IpaPagamento.objects.filter(municipe=municipe)
+        prop_pagamentos=PropPagamento.objects.filter(municipe=municipe)
+        iav_pagamentos=IavPagamento.objects.filter(municipe=municipe)
+        tae_pagamentos=TaePagamento.objects.filter(municipe=municipe)
+        urb_pagamentos=UrbPagamento.objects.filter(municipe=municipe)
+        decl_pagamentos=DeclaracaoPagamento.objects.filter(municipe=municipe)
+        pub_pagamentos=PubPagamento.objects.filter(municipe=municipe)
+        trans_pagamentos=TransPagamento.objects.filter(municipe=municipe)
+        residual_pagamentos=ResidualPagamento.objects.filter(municipe=municipe)
+        mercado_pagamentos=MercadoPagamento.objects.filter(municipe=municipe)
+        generico_pagamentos=GenericoPagamento.objects.filter(municipe=municipe)
+        #serializers
+        ipa_serializer=IpaPagamentoSerializer(ipa_pagamentos, many=True)
+        prop_serializer=PropPagamentoSerializer(prop_pagamentos, many=True)
+        iav_serializer=IavPagamentoSerializer(iav_pagamentos, many=True)
+        tae_serializer=TaePagamentoSerializer(tae_pagamentos, many=True)
+        urb_serializer=UrbPagamentoSerializer(urb_pagamentos, many=True)
+        decl_serializer=DeclaracaoPagamentoSerializer(decl_pagamentos, many=True)
+        pub_serializer=PubPagamentoSerializer(pub_pagamentos, many=True)
+        trans_serializers=TransPagamentoSerializer(trans_pagamentos, many=True)
+        residual_serializers=ResidualPagamentoSerializer(residual_pagamentos, many=True)
+        mercado_serializers=MercadoPagamentoSerializer(mercado_pagamentos, many=True)
+        generico_serializer=GenericoPagamentoSerializer(generico_pagamentos, many=True)
+        #junta em uma lista e ordena por pagamento.data
+        lista=tae_serializer.data+generico_serializer.data+urb_serializer.data+decl_serializer.data+pub_serializer.data+trans_serializers.data+residual_serializers.data+mercado_serializers.data+iav_serializer.data+ipa_serializer.data+prop_serializer.data
+        lista.sort(key=lambda x: x['pagamento']['data'])
+
+        print(lista)
+        #retorne o response
+        return Response(lista, status=status.HTTP_200_OK)

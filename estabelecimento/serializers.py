@@ -15,6 +15,7 @@ class EstabelecimentoCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'nr_contribuente', 'nome','area', 'sector', 'bairro_id','valor_tae']
 
     def create(self, validated_data):
+        print(validated_data)
         nr_contribuente = validated_data.pop('nr_contribuente')
         bairro_id = validated_data.pop('bairro_id')
 
@@ -63,15 +64,15 @@ class EstabelecimentoCreateSerializer(serializers.ModelSerializer):
             elif(area=="+100 m2"):# +100 m2
                 valor=82718
         elif(sector=="Sector de Hotelaria, Restaurante e aluguer de Quartos"):
-            if(area=="Aluguer de quartos até 5"):#Aluguer de quartos até 5
+            if(area=="Aluguer de Quartos até 5"):#Aluguer de quartos até 5
                 valor=13359
-            elif(area=="Aluguer de quartos mais de 5"):#Aluguer de quartos mais de 5
+            elif(area=="Aluguer de Quartos +5"):#Aluguer de quartos mais de 5
                 valor=40474
             elif(area=="De 0-50 m2"):# De 0-50 m2
                 valor=40077
             elif(area=="De 0-100 m2"):# De 0-100 m2
                 valor=40473
-            elif(area=="+100 m2"):# +100 m2
+            elif(area=="+ 100 m2"):# +100 m2
                 valor=40870
 
         

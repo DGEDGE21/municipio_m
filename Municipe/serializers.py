@@ -1,11 +1,16 @@
 from rest_framework import serializers
-from .models import Bairro, Municipe
+from .models import Bairro, Municipe, Mercado
 from django.contrib.auth.models import User, Group
 
 
 class BairroSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bairro
+        fields = '__all__'
+
+class MercadoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Mercado
         fields = '__all__'
 
 class MunicipeCreateSerializer(serializers.ModelSerializer):

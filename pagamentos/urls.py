@@ -28,6 +28,11 @@ urlpatterns = [
     path('list-taxas/', ListTaxas.as_view(), name='list-taxas'),
     path('check-urb/', UrbanizacaoCheckView.as_view(), name='check-urb'),
     path('pay-residual/', payResidual.as_view(), name='pay-residual'),
-    path('list-residual/', ResidualListView.as_view(), name='list-residual')
+    path('list-residual/', ResidualListView.as_view(), name='list-residual'),
+    path('pay-mercado/', payMercado.as_view(), name='pay-mercado'),
+    path('list-mercado/', MercadoListView.as_view(), name='list-mercado'),
+    path('pay-generico/', payGenerico.as_view(), name='pay-generico'),
+    path('list-generico/', GenericoListView.as_view(), name='list-generico'),
+     path('municipe-pagamentos/<str:nr_contribuinte>/', MunicipePagamentos.as_view(), name='municipe-pagamentos'),
     # Outras URLs do seu aplicativo...
 ]

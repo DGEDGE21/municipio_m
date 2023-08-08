@@ -92,3 +92,22 @@ class ResidualPagamentoSerializer(serializers.ModelSerializer):
         model = ResidualPagamento
         fields = ['id', 'municipe', 'taxa','pagamento']
 
+class MercadoPagamentoSerializer(serializers.ModelSerializer):
+    municipe = MunicipeSerializer()
+    taxa = TaxaSerializer()
+    pagamento = PagamentoSerializer()
+    mercado=MercadoSerializer()
+    class Meta:
+        model = MercadoPagamento
+        fields = ['id', 'municipe', 'mercado', 'taxa','pagamento']
+
+class GenericoPagamentoSerializer(serializers.ModelSerializer):
+    municipe = MunicipeSerializer()
+    taxa = TaxaSerializer()
+    pagamento = PagamentoSerializer()
+    class Meta:
+        model = GenericoPagamento
+        fields = ['id', 'municipe', 'taxa','pagamento']
+
+
+

@@ -225,3 +225,24 @@ class calculo_publicidade(APIView):
         
 
         return Response(data={"valor": valor})
+
+class cadastrar_taxas(APIView):
+    def post(self, request, format=None):
+        taxas = request.data.get('taxas')
+        for taxa in taxas:
+            nome=taxa.get('nome')
+            rubrica = taxa.get('rubrica')
+            destino = taxa.get('destino')
+            valor = taxa.get('valor')
+            periodicitade = taxa.get('periodicidade')
+            taxa_obj = Taxa.objects.create(
+                nome=nome,
+                rubrica=rubrica,
+                lei="None",
+                destino=destino,
+                valor=valor,
+                periodicidade=periodicitade,
+                data_maxima=datetime.now()
+            )
+            taxa_obj.save()
+        return Response(data={"success": True})
