@@ -31,6 +31,7 @@ urlpatterns = [
     path('list-impostos/', ListImpostos.as_view(), name='list-impostos'),
     path('list-taxas/', ListTaxas.as_view(), name='list-taxas'),
     path('check-urb/', UrbanizacaoCheckView.as_view(), name='check-urb'),
+    path('check-trans/', PlanificacaoCheckView.as_view(), name='check-trans'),
     path('pay-residual/', payResidual.as_view(), name='pay-residual'),
     path('list-residual/', ResidualListView.as_view(), name='list-residual'),
     path('pay-mercado/', payMercado.as_view(), name='pay-mercado'),

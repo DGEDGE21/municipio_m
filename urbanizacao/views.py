@@ -97,7 +97,9 @@ class LicensaAprovarView(APIView):
         return Response(status=200)
 
 #Listar todas as Licensas de LicensaDuat, LicensaConstrucao que tenham status Aguardando Aprovacao
-class LicensaListView(ListAPIView):    
+
+
+class LicensaListView(ListAPIView):
     serializer_class = LicensaSerializer
     def get(self, request, format=None):
         todas_declaracoes = (

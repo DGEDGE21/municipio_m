@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     "declaracao",
     "administracao",
     "audiencia",
+    "planificacao",
+    "licenciamento"
 ]
 
 MIDDLEWARE = [
