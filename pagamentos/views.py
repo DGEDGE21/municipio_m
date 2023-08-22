@@ -24,6 +24,7 @@ from estabelecimento.models import *
 from declaracao.models import *
 from urbanizacao.models import *
 from planificacao.models import *
+from licenciamento.models import *
 from taxas.models import *
 from rest_framework import status
 from django.db import transaction
@@ -882,3 +883,23 @@ class MunicipePagamentos(APIView):
         print(lista)
         #retorne o response
         return Response(lista, status=status.HTTP_200_OK)
+
+class LicenciamentoCheckView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self, request, format=None):
+        idPlan = request.data.get('id')
+        try:
+            plan_pay = GenericoPagamento.objects.get(pagamento__id=idPlan, taxa__destino="ae-lic")
+            plan_s= GenericoPagamentoSerializer(plan_pay).data
+            # Verificar o tipo da declaração associada e obter o objeto concreto
+            if LicensaAE.objects.filter(pagamento=plan_pay).exists():
+                pass
+            else:
+                # Caso a declaração associada não corresponda a nenhum tipo conhecido
+                return Response({'exists': False, 'dados': plan_s}, status=status.HTTP_200_OK)
+            # Obter os dados serializados da declaração associada
+            return Response({'exists': True}, status=status.HTTP_200_OK)
+
+        except GenericoPagamento.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)

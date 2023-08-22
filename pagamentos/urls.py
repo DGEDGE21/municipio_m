@@ -40,5 +40,6 @@ urlpatterns = [
     path('list-generico/', GenericoListView.as_view(), name='list-generico'),
     path('municipe-pagamentos/<str:nr_contribuinte>/',
          MunicipePagamentos.as_view(), name='municipe-pagamentos'),
+    path('check-lic/', LicenciamentoCheckView.as_view(), name='check-lic'),
     # Outras URLs do seu aplicativo...
 ]

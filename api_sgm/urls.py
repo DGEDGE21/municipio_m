@@ -32,4 +32,5 @@ urlpatterns = [
     path("administracao/",include('administracao.urls')),
     path("audiencia/",include('audiencia.urls')),
     path("planificacao/",include('planificacao.urls')),
+    path("licenciamento/",include('licenciamento.urls')),
 ]

@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 class LicensaAE(models.Model):
     id = models.AutoField(primary_key=True)
     pagamento = models.OneToOneField(GenericoPagamento, on_delete=models.CASCADE, db_column='id_pagamento_generico')
+    destino = models.CharField(max_length=100, null=True)
     bairro= models.CharField(max_length=100, null=True)
     quarteirao=models.CharField(max_length=100, null=True)
     nr_casa= models.CharField(max_length=100, null=True)
