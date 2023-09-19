@@ -41,5 +41,11 @@ urlpatterns = [
     path('municipe-pagamentos/<str:nr_contribuinte>/',
          MunicipePagamentos.as_view(), name='municipe-pagamentos'),
     path('check-lic/', LicenciamentoCheckView.as_view(), name='check-lic'),
+    path('get-guia/<str:nr_contribuinte>/', GuiaMunicipe.as_view(), name='get-guia'),
+    path('confirmar-pagamento/', ConfirmarPagamento.as_view(), name='confirm-guia'),
+    path('relatorio-caixa/', RelatorioCaixa.as_view(), name='confirm-guia'),
+    path('find_dcl/<str:nr_contribuinte>/<str:rubrica>/', DeclaracaoPagamentoMunicipe.as_view(), name='declaracao_pagamento_municipe'),
+    path('find_lic_ae/<str:nr_contribuinte>/<str:rubrica>/', LicensaPagamentoMunicipe.as_view(), name='licensa_pagamento_municipe'),
+    path('find_lic_plan/<str:nr_contribuinte>/<str:rubrica>/', PlanificacaoPagamentoMunicipe.as_view(), name='plan_pagamento_municipe'),
     # Outras URLs do seu aplicativo...
 ]

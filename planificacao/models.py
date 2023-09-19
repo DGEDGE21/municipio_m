@@ -13,6 +13,7 @@ class LicensaTransporte(models.Model):
     data_registo = models.DateTimeField(auto_now_add=True, null=True)
     data_aprovacao = models.DateTimeField(null=True)
     user = models.ForeignKey(User, null=True,on_delete=models.CASCADE, db_column='user_id')
+    pedido = models.FileField(upload_to='pedidos/', null=True)
 
 class LicensaAgua(models.Model):
     id = models.AutoField(primary_key=True)
@@ -24,3 +25,4 @@ class LicensaAgua(models.Model):
     data_registo = models.DateTimeField(auto_now_add=True, null=True)
     data_aprovacao = models.DateTimeField(null=True)
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE, db_column='user_id')
+    pedido = models.FileField(upload_to='pedidos/', null=True)

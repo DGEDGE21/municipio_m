@@ -25,7 +25,7 @@ from estabelecimento.serializers import *
 from rest_framework.views import APIView
 
 class TaxaListView(ListAPIView):
-    queryset = Taxa.objects.filter(destino="publicidade")
+    queryset = Taxa.objects.all()
     serializer_class = TaxaSerializer
 
 

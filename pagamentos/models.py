@@ -14,6 +14,7 @@ class Pagamento(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
     bairro = models.ForeignKey(Bairro, on_delete=models.CASCADE, db_column='bairro_id', verbose_name='Bairro')
     metodo= models.CharField(max_length=100, null=True, db_column='metodo',default='Numerário')
+    isPaid= models.BooleanField(default=False, db_column='status')
     def __str__(self):
         return f"Pagamento {self.id}"
 

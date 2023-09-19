@@ -27,7 +27,9 @@ class MunicipeCreateSerializer(serializers.ModelSerializer):
         validated_data['nr_contribuente'] = contribuinte_number
 
         # Criar usuário
-        user = User(username=contribuinte_number)
+        #cria o username com o nome e outrous criterios para garantir que seja unico
+        username = validated_data['telefone']
+        user = User.objects.create(username=username)
         user.set_password(contribuinte_number)
         user.save()
 

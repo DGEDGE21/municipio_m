@@ -24,7 +24,11 @@ from pagamentos.models import *
 from pagamentos.serializers import *
 from datetime import datetime
 from rest_framework.views import APIView
-from automovel.views import calcula_iav	
+from automovel.views import calcula_iav
+from licenciamento.models import *
+from planificacao.models import *
+from planificacao.serializers import *
+from licenciamento.serializers import *
 
 class MunicipeCreateView(CreateAPIView):
     authentication_classes = [TokenAuthentication]
@@ -172,3 +176,33 @@ class cadastrar_mercados(APIView):
             )
             mercado_obj.save()
         return Response(data={"success": True})
+
+class LicensasListView(ListAPIView):
+
+    def get(self, request, format=None, **kwargs):
+        municipe = Municipe.objects.get(nr_contribuente=self.kwargs['nr_contribuente'])
+        todas_declaracoes = (
+                list(LicensaAE.objects.filter(pagamento__municipe=municipe)) +
+                list(LicensaAgua.objects.filter(pagamento__municipe=municipe)) +
+                list(LicensaTransporte.objects.filter(pagamento__municipe=municipe))
+            )
+
+        # Ordenar a lista de declarações por data_registo em ordem descendente
+        todas_declaracoes = sorted(todas_declaracoes, key=lambda x: x.data_registo, reverse=True)
+
+        # Serializar a lista de declarações usando o serializer apropriado para cada tipo
+        serialized_declaracoes = []
+        for declaracao in todas_declaracoes:
+            if isinstance(declaracao, LicensaAgua):
+                serializer = LicensaAguaSerializer(declaracao)
+            elif isinstance(declaracao, LicensaTransporte):
+                serializer = LicensaTransporteSerializer(declaracao)
+            elif isinstance(declaracao, LicensaAE):
+                serializer = LicensaAESerializer(declaracao)
+            else:
+                # Trate outros tipos de declaração aqui, se necessário
+                continue
+            serialized_declaracoes.append(serializer.data)
+
+        serialized_declaracoes.reverse()
+        return Response(serialized_declaracoes, status=200)

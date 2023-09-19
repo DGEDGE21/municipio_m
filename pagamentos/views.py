@@ -28,6 +28,7 @@ from licenciamento.models import *
 from taxas.models import *
 from rest_framework import status
 from django.db import transaction
+from datetime import *
 
 # Create your views here.
 class payIpa(CreateAPIView):
@@ -57,6 +58,13 @@ class payIpa(CreateAPIView):
                     user=usuario,
                     metodo=self.request.data['metodo']
                 )
+
+                if self.request.data['metodo'] == None:
+                    bill.isPaid=False
+                    bill.save()
+                else:
+                    bill.isPaid = True
+                    bill.save()
 
                 # Criando o objeto IpaPagamento
                 billIpa = IpaPagamento.objects.create(
@@ -88,18 +96,21 @@ class CheckIpaPagamentoView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request, format=None):
         print('start')
+        print(self.request.data)
         nr_contribuente = request.data.get('nr_contribuente')
         epoca = request.data.get('epoca')
 
         try:
             municipe = Municipe.objects.get(nr_contribuente=nr_contribuente)
             municipe_s = MunicipeSerializer(municipe).data
-            ipa_pagamento = IpaPagamento.objects.get(municipe=municipe, epoca=epoca)
-            return Response({'exists': True, 'data':municipe_s}, status=status.HTTP_200_OK)
+            if(IpaPagamento.objects.filter(municipe=municipe, epoca=epoca, pagamento__isPaid=True).exists()):
+                return Response({'exists': True, 'data':municipe_s}, status=200)
+            else:
+                return Response({'exists': False, 'data': municipe_s}, status=200)
         except Municipe.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         except IpaPagamento.DoesNotExist:
-            return Response({'exists': False, 'data':municipe_s}, status=status.HTTP_200_OK)
+            return Response({'exists': False, 'data':municipe_s}, status=200)
 
 class CheckPropPagamentoView(APIView):
     authentication_classes = [TokenAuthentication]
@@ -124,7 +135,7 @@ class CheckPropPagamentoView(APIView):
                 else:
                     valor= float(prop_s['valor_patrimonial'])*0.007
             saldo=valor
-            prop_pagamento = PropPagamento.objects.filter(propriedade=prop, imposto__rubrica=rubrica,epoca=epoca)
+            prop_pagamento = PropPagamento.objects.filter(propriedade=prop, imposto__rubrica=rubrica,epoca=epoca, pagamento__isPaid=True)
             if(prop_pagamento.exists()):
                 valor_total = prop_pagamento.aggregate(Sum('pagamento__valor'))['pagamento__valor__sum']
                 if valor_total is None:
@@ -169,6 +180,13 @@ class payProp(CreateAPIView):
                     metodo=self.request.data['metodo']
                 )
 
+                if self.request.data['metodo'] == None:
+                    bill.isPaid=False
+                    bill.save()
+                else:
+                    bill.isPaid = True
+                    bill.save()
+
                 # Criando o objeto IpaPagamento
                 billProp = PropPagamento.objects.create(
                     municipe=pessoa,
@@ -206,7 +224,7 @@ class CheckIavPagamentoView(APIView):
 
         try:
             auto=Automovel.objects.get(matricula=matricula)
-            ipa_pagamento = IavPagamento.objects.get(automovel=auto, imposto__rubrica=rubrica, epoca=epoca)
+            ipa_pagamento = IavPagamento.objects.get(automovel=auto, imposto__rubrica=rubrica, epoca=epoca, pagamento__isPaid=True)
             return Response({'exists': True}, status=status.HTTP_200_OK)
         except Automovel.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -244,6 +262,13 @@ class payIav(CreateAPIView):
                     user=usuario,
                     metodo=self.request.data['metodo']
                 )
+
+                if self.request.data['metodo'] == None:
+                    bill.isPaid=False
+                    bill.save()
+                else:
+                    bill.isPaid = True
+                    bill.save()
 
                 # Criando o objeto IavPagamento
                 billIav = IavPagamento.objects.create(
@@ -333,6 +358,13 @@ class payTae(CreateAPIView):
                     metodo=self.request.data['metodo']
                 )
 
+                if self.request.data['metodo'] == None:
+                    bill.isPaid=False
+                    bill.save()
+                else:
+                    bill.isPaid = True
+                    bill.save()
+
                 # Criando o objeto IpaPagamento
                 billProp = TaePagamento.objects.create(
                     municipe=pessoa,
@@ -359,8 +391,6 @@ class TaeListView(ListAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-
-        
 class payDeclaracao(CreateAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -388,6 +418,13 @@ class payDeclaracao(CreateAPIView):
                     user=usuario,
                     metodo=self.request.data['metodo']
                 )
+
+                if self.request.data['metodo'] == None:
+                    bill.isPaid=False
+                    bill.save()
+                else:
+                    bill.isPaid = True
+                    bill.save()
 
                 # Criando o objeto IpaPagamento
                 billProp = DeclaracaoPagamento.objects.create(
@@ -475,6 +512,13 @@ class payUrb(CreateAPIView):
                     metodo=self.request.data['metodo']
                 )
 
+                if self.request.data['metodo'] == None:
+                    bill.isPaid=False
+                    bill.save()
+                else:
+                    bill.isPaid = True
+                    bill.save()
+
                 # Criando o objeto IpaPagamento
                 billProp = UrbPagamento.objects.create(
                     municipe=pessoa,
@@ -528,12 +572,18 @@ class payPub(CreateAPIView):
                     metodo=self.request.data['metodo']
                 )
 
+                if self.request.data['metodo'] == None:
+                    bill.isPaid=False
+                    bill.save()
+                else:
+                    bill.isPaid = True
+                    bill.save()
+
                 # Criando o objeto IpaPagamento
                 billProp = PubPagamento.objects.create(
                     municipe=pessoa,
                     taxa=tipo,
                     pagamento=bill,
-                    tipo=self.request.data['tipo'],
                     unidade=self.request.data['unit']
                 )
 
@@ -581,6 +631,13 @@ class payTrans(CreateAPIView):
                     user=usuario,
                     metodo=self.request.data['metodo']
                 )
+
+                if self.request.data['metodo'] == None:
+                    bill.isPaid=False
+                    bill.save()
+                else:
+                    bill.isPaid = True
+                    bill.save()
 
                 # Criando o objeto IpaPagamento
                 billProp = TransPagamento.objects.create(
@@ -718,6 +775,13 @@ class payResidual(CreateAPIView):
                     metodo=self.request.data['metodo']
                 )
 
+                if self.request.data['metodo'] == None:
+                    bill.isPaid=False
+                    bill.save()
+                else:
+                    bill.isPaid = True
+                    bill.save()
+
                 # Criando o objeto IpaPagamento
                 billProp = ResidualPagamento.objects.create(
                     municipe=pessoa,
@@ -772,6 +836,13 @@ class payMercado(CreateAPIView):
                     metodo=self.request.data['metodo']
                 )
 
+                if self.request.data['metodo'] == None:
+                    bill.isPaid=False
+                    bill.save()
+                else:
+                    bill.isPaid = True
+                    bill.save()
+
                 # Criando o objeto IpaPagamento
                 billProp = MercadoPagamento.objects.create(
                     municipe=pessoa,
@@ -824,6 +895,13 @@ class payGenerico(CreateAPIView):
                     user=usuario,
                     metodo=self.request.data['metodo']
                 )
+
+                if self.request.data['metodo'] == None:
+                    bill.isPaid=False
+                    bill.save()
+                else:
+                    bill.isPaid = True
+                    bill.save()
 
                 # Criando o objeto IpaPagamento
                 billProp = GenericoPagamento.objects.create(
@@ -903,3 +981,181 @@ class LicenciamentoCheckView(APIView):
 
         except GenericoPagamento.DoesNotExist:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class GuiaMunicipe(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, format=None, **kwargs):
+        municipe=Municipe.objects.get(nr_contribuente=self.kwargs['nr_contribuinte'])
+        municipe_s=MunicipeSerializer(municipe).data
+        ipa_pagamentos=IpaPagamento.objects.filter(municipe=municipe, pagamento__isPaid=False)
+        prop_pagamentos=PropPagamento.objects.filter(municipe=municipe, pagamento__isPaid=False)
+        iav_pagamentos=IavPagamento.objects.filter(municipe=municipe, pagamento__isPaid=False)
+        tae_pagamentos=TaePagamento.objects.filter(municipe=municipe, pagamento__isPaid=False)
+        urb_pagamentos=UrbPagamento.objects.filter(municipe=municipe, pagamento__isPaid=False)
+        decl_pagamentos=DeclaracaoPagamento.objects.filter(municipe=municipe, pagamento__isPaid=False)
+        pub_pagamentos=PubPagamento.objects.filter(municipe=municipe, pagamento__isPaid=False)
+        trans_pagamentos=TransPagamento.objects.filter(municipe=municipe, pagamento__isPaid=False)
+        residual_pagamentos=ResidualPagamento.objects.filter(municipe=municipe, pagamento__isPaid=False)
+        mercado_pagamentos=MercadoPagamento.objects.filter(municipe=municipe, pagamento__isPaid=False)
+        generico_pagamentos=GenericoPagamento.objects.filter(municipe=municipe, pagamento__isPaid=False)
+        #serializers
+        ipa_serializer=IpaPagamentoSerializer(ipa_pagamentos, many=True)
+        prop_serializer=PropPagamentoSerializer(prop_pagamentos, many=True)
+        iav_serializer=IavPagamentoSerializer(iav_pagamentos, many=True)
+        tae_serializer=TaePagamentoSerializer(tae_pagamentos, many=True)
+        urb_serializer=UrbPagamentoSerializer(urb_pagamentos, many=True)
+        decl_serializer=DeclaracaoPagamentoSerializer(decl_pagamentos, many=True)
+        pub_serializer=PubPagamentoSerializer(pub_pagamentos, many=True)
+        trans_serializers=TransPagamentoSerializer(trans_pagamentos, many=True)
+        residual_serializers=ResidualPagamentoSerializer(residual_pagamentos, many=True)
+        mercado_serializers=MercadoPagamentoSerializer(mercado_pagamentos, many=True)
+        generico_serializer=GenericoPagamentoSerializer(generico_pagamentos, many=True)
+        #junta em uma lista e ordena por pagamento.data
+        lista=tae_serializer.data+generico_serializer.data+urb_serializer.data+decl_serializer.data+pub_serializer.data+trans_serializers.data+residual_serializers.data+mercado_serializers.data+iav_serializer.data+ipa_serializer.data+prop_serializer.data
+        lista.sort(key=lambda x: x['pagamento']['data'])
+
+        print(lista)
+        #retorne o response
+        return Response(data={'municipe':municipe_s, 'lista':lista}, status=status.HTTP_200_OK)
+
+
+#quero uma view quer recebe o id  do pagamento e muda o isPaid para true e faz update do user, suponha que receba mais de um pagamento
+class ConfirmarPagamento(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self, request, format=None):
+        pays=request.data.get('pays')
+        user = request.user
+        usuario = User.objects.get(username=user)
+        for pay in pays:
+            try:
+                pagamento=Pagamento.objects.get(id=pay)
+                pagamento.isPaid=True
+                pagamento.user=usuario
+                pagamento.data=datetime.now()
+                pagamento.save()
+            except Pagamento.DoesNotExist:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
+
+class RelatorioCaixa(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, format=None, **kwargs):
+        user = request.user
+        usuario = User.objects.get(username=user)
+
+        ipa_pagamentos=IpaPagamento.objects.filter(pagamento__isPaid=True, pagamento__user=usuario)
+        prop_pagamentos=PropPagamento.objects.filter(pagamento__isPaid=True, pagamento__user=usuario)
+        iav_pagamentos=IavPagamento.objects.filter(pagamento__isPaid=True, pagamento__user=usuario)
+        tae_pagamentos=TaePagamento.objects.filter(pagamento__isPaid=True, pagamento__user=usuario)
+        urb_pagamentos=UrbPagamento.objects.filter(pagamento__isPaid=True, pagamento__user=usuario)
+        decl_pagamentos=DeclaracaoPagamento.objects.filter(pagamento__isPaid=True, pagamento__user=usuario)
+        pub_pagamentos=PubPagamento.objects.filter(pagamento__isPaid=True, pagamento__user=usuario)
+        trans_pagamentos=TransPagamento.objects.filter(pagamento__isPaid=True, pagamento__user=usuario)
+        residual_pagamentos=ResidualPagamento.objects.filter(pagamento__isPaid=True, pagamento__user=usuario)
+        mercado_pagamentos=MercadoPagamento.objects.filter(pagamento__isPaid=True, pagamento__user=usuario)
+        generico_pagamentos=GenericoPagamento.objects.filter(pagamento__isPaid=True, pagamento__user=usuario)
+        #serializers
+        ipa_serializer=IpaPagamentoSerializer(ipa_pagamentos, many=True)
+        prop_serializer=PropPagamentoSerializer(prop_pagamentos, many=True)
+        iav_serializer=IavPagamentoSerializer(iav_pagamentos, many=True)
+        tae_serializer=TaePagamentoSerializer(tae_pagamentos, many=True)
+        urb_serializer=UrbPagamentoSerializer(urb_pagamentos, many=True)
+        decl_serializer=DeclaracaoPagamentoSerializer(decl_pagamentos, many=True)
+        pub_serializer=PubPagamentoSerializer(pub_pagamentos, many=True)
+        trans_serializers=TransPagamentoSerializer(trans_pagamentos, many=True)
+        residual_serializers=ResidualPagamentoSerializer(residual_pagamentos, many=True)
+        mercado_serializers=MercadoPagamentoSerializer(mercado_pagamentos, many=True)
+        generico_serializer=GenericoPagamentoSerializer(generico_pagamentos, many=True)
+        #junta em uma lista e ordena por pagamento.data
+        lista=tae_serializer.data+generico_serializer.data+urb_serializer.data+decl_serializer.data+pub_serializer.data+trans_serializers.data+residual_serializers.data+mercado_serializers.data+iav_serializer.data+ipa_serializer.data+prop_serializer.data
+        lista.sort(key=lambda x: x['pagamento']['data'])
+
+        print(lista)
+        #retorne o response
+        return Response(data={'lista':lista}, status=status.HTTP_200_OK)
+
+#com base no nr_contribuinte, retorna filtra os DeclaraçãoPagamento em que o pagamento.isPaid=True
+class DeclaracaoPagamentoMunicipe(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, format=None, **kwargs):
+        print(self.kwargs['nr_contribuinte'])
+        print(self.kwargs['rubrica'])
+        municipe=Municipe.objects.get(nr_contribuente=self.kwargs['nr_contribuinte'])
+        rubrica=self.kwargs['rubrica']
+        municipe_s=MunicipeSerializer(municipe).data
+        decl_pagamentos=DeclaracaoPagamento.objects.filter(municipe=municipe, pagamento__isPaid=True)
+
+        #pega cada um dos pagamentos e verifica se existe uma declaração associada, se nao existir retorna o response do pagamento serializado
+        lista=[]
+        for decl in decl_pagamentos:
+            # Verificar o tipo da declaração associada e obter o objeto concreto
+            if hasattr(decl, 'declaracaopobreza'):
+                declaracao_associada = decl.declaracaopobreza
+            elif hasattr(decl, 'declaracaoresidencia'):
+                declaracao_associada = decl.declaracaoresidencia
+            elif hasattr(decl, 'declaracaomatricial'):
+                declaracao_associada = decl.declaracaomatricial
+            elif hasattr(decl, 'declaracaoviagem'):
+                declaracao_associada = decl.declaracaoviagem
+            elif hasattr(decl, 'declaracaocredencialviagem'):
+                declaracao_associada = decl.declaracaocredencialviagem
+            elif hasattr(decl, 'declaracaoobito'):
+                declaracao_associada = decl.declaracaoobito
+            else:
+                # Caso a declaração associada não corresponda a nenhum tipo conhecido
+                if(decl.taxa.rubrica==rubrica):
+                    return Response({'exists': True, 'id':decl.id}, status=status.HTTP_200_OK)
+                else:
+                    pass
+
+        return Response(data={'exists':False}, status=status.HTTP_200_OK)
+
+class LicensaPagamentoMunicipe(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, format=None, **kwargs):
+        municipe=Municipe.objects.get(nr_contribuente=self.kwargs['nr_contribuinte'])
+        rubrica = self.kwargs['rubrica']
+        municipe_s=MunicipeSerializer(municipe).data
+        decl_pagamentos=GenericoPagamento.objects.filter(municipe=municipe, pagamento__isPaid=True, taxa__destino="ae-lic")
+
+        #pega cada um dos pagamentos e verifica se existe uma declaração associada, se nao existir retorna o response do pagamento serializado
+        lista=[]
+        for decl in decl_pagamentos:
+            if LicensaAE.objects.filter(pagamento=decl).exists():
+                pass
+            else:
+                if (decl.taxa.rubrica == rubrica):
+                    return Response({'exists': True, 'id': decl.id}, status=status.HTTP_200_OK)
+                else:
+                    pass
+        return Response(data={'exists':False}, status=status.HTTP_200_OK)
+
+class PlanificacaoPagamentoMunicipe(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, format=None, **kwargs):
+        print(self.kwargs['rubrica'])
+        municipe=Municipe.objects.get(nr_contribuente=self.kwargs['nr_contribuinte'])
+        rubrica = self.kwargs['rubrica']
+        municipe_s=MunicipeSerializer(municipe).data
+        decl_pagamentos=TransPagamento.objects.filter(municipe=municipe, pagamento__isPaid=True)
+        #pega cada um dos pagamentos e verifica se existe uma declaração associada, se nao existir retorna o response do pagamento serializado
+        lista=[]
+        for decl in decl_pagamentos:
+            print(decl.taxa.rubrica)
+            print(rubrica)
+            if LicensaTransporte.objects.filter(pagamento=decl).exists():
+                pass
+            if LicensaAgua.objects.filter(pagamento=decl).exists():
+                pass
+            else:
+                if (decl.taxa.rubrica == rubrica):
+                    return Response({'exists': True, 'id': decl.id}, status=status.HTTP_200_OK)
+                else:
+                    pass
+        return Response(data={'exists':False}, status=status.HTTP_200_OK)

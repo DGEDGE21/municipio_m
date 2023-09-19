@@ -8,4 +8,5 @@ urlpatterns = [
     path('aprovacao/', LicensaAprovarView.as_view(), name='licensa-aprovacao'),
     path('list/', LicensaListView.as_view(), name='licensa-list'),
     path('list-aproved/', LicensaAprovedView.as_view(), name='licensa-aprovacao-list'),
+    path('novo-pedido/', NovoPedido.as_view(), name='licensa-PEDIDO-lic'),
 ]

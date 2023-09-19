@@ -20,7 +20,7 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
 from django.shortcuts import render
 from rest_framework.views import APIView
 from pagamentos.models import TransPagamento
-
+from django.db import transaction
 
 class LicensaCreateView(CreateAPIView):
     authentication_classes = [TokenAuthentication]
@@ -140,3 +140,71 @@ class LicensaAprovarView(APIView):
         licensa.data_aprovacao = datetime.now()
         licensa.save()
         return Response(status=200)
+
+class NovoPedido(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self, request, *args, **kwargs):
+        dados=self.request.data
+        print(dados)
+
+        try:
+            user = request.user
+
+            usuario = User.objects.get(username=user)
+
+            pessoa = Municipe.objects.get(
+                nr_contribuente=dados['nca']
+            )
+
+            tax = Taxa.objects.get(rubrica=dados['rubrica'])
+            taxa=TaxaSerializer(tax).data
+            with transaction.atomic():  # Inicia uma transação
+
+                if(dados['status']=="paid"):
+                    billProp=TransPagamento.objects.get(id=dados['paymentId'])
+                    status="Em Processo"
+                else:
+                    # Criando o objeto Pagamento
+                    bill = Pagamento.objects.create(
+                        bairro=pessoa.bairro,
+                        valor=float(taxa['valor']),
+                        user=usuario,
+                        metodo=None,
+                        isPaid=False
+                    )
+                    bill.save()
+                    # Criando o objeto DclPagamento
+                    billProp = TransPagamento.objects.create(
+                        municipe=pessoa,
+                        taxa=tax,
+                        pagamento=bill,
+                    )
+                    status="Aguardando Pagamento"
+
+                if(tax.rubrica=='tr11' or tax.rubrica=='tr15'):
+                    dcl = LicensaTransporte.objects.create(
+                        pagamento=billProp,
+                        pedido=dados["minuta"],
+                        status=status
+                    )
+                    dcl.save()
+                elif(tax.rubrica=='tr13'):
+                    dcl = LicensaAgua.objects.create(
+                        pagamento=billProp,
+                        pedido=dados["minuta"],
+                        status=status
+                    )
+                    dcl.save()
+                else:
+                    return Response(status=400)
+            return Response(status=200)
+        except Exception as e:
+            # Em caso de erro, remove os objetos criados
+            if 'bill' in locals() and bill:
+                bill.delete()
+            if 'billProp' in locals() and billProp:
+                billProp.delete()
+            print(e)
+
+            return Response({'error': str(e)}, status=404)
