@@ -91,11 +91,13 @@ CORS_ORIGIN_WHITELIST=[
     'http://localhost:3000',
     'http://localhost:8080',
     'http://localhost:3001',
+    'https://1159-129-222-145-93.ngrok-free.app'
 ]
 
 CORS_ALLOWED_ORIGINS=[
     'http://localhost:3000',
     'http://localhost:3001',
+    'https://1159-129-222-145-93.ngrok-free.app'
 ]
 
 # Database
@@ -104,7 +106,7 @@ CORS_ALLOWED_ORIGINS=[
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": str(BASE_DIR / "db.sqlite3"),
     }
 }
 
